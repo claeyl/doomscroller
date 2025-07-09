@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Doomscroller",
+  "version": "1.0.0",
+  "description": "Automatically scroll YouTube Shorts",
+  "permissions": ["scripting"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
