@@ -1,54 +1,63 @@
 // Some Relevant Selectors
-const SHORTS_INNER_CONTAINER_ID = 'shorts-inner-container';
-const NEXT_VIDEO_BUTTON_CONTAINER_ID = 'navigation-button-down';
+class AutoscrollerController {
+  static SHORTS_INNER_CONTAINER_ID = 'shorts-inner-container';
+  static NEXT_VIDEO_BUTTON_CONTAINER_ID = 'navigation-button-down';
 
-// Some global variables
-let lastVideoSrc: string | null = null;
-const nextVideoBtn = document.querySelector(
-  `#${NEXT_VIDEO_BUTTON_CONTAINER_ID} button`
-) as HTMLButtonElement;
+  lastVideoSrc: string | null;
+  nextVideoBtn: HTMLButtonElement;
 
-const setupVideo = (video: HTMLVideoElement): void => {
-  if (!video) return;
-  video.loop = false;
+  constructor() {
+    this.lastVideoSrc = null;
+    this.nextVideoBtn = document.querySelector(
+      `#${AutoscrollerController.NEXT_VIDEO_BUTTON_CONTAINER_ID} button`
+    ) as HTMLButtonElement;
+  }
 
-  video.addEventListener('ended', () => nextVideoBtn.click());
+  setupVideo(video: HTMLVideoElement) {
+    if (!video) return;
+    video.loop = false;
 
-  // every triggered event seems to be making video.loop to true, so we set it back to false
-  const videoLoopObserver = new MutationObserver(() => (video.loop = false));
-  videoLoopObserver.observe(video, { attributeFilter: ['loop'] });
-};
+    video.addEventListener('ended', () => this.nextVideoBtn.click());
 
-const observeChange = (): void => {
-  const videoNodeObserver = new MutationObserver(() => {
-    const currentVid = document.querySelector(
-      `#${SHORTS_INNER_CONTAINER_ID} video`
-    ) as HTMLVideoElement;
+    // every triggered event seems to be restting the video's loop to `true`, so we set it back to `false`
+    const videoLoopObserver = new MutationObserver(() => (video.loop = false));
+    videoLoopObserver.observe(video, { attributeFilter: ['loop'] });
+  }
 
-    if (currentVid && currentVid.src !== lastVideoSrc) {
-      setupVideo(currentVid);
-      lastVideoSrc = currentVid.src;
-    }
-  });
+  observeChange() {
+    const videoNodeObserver = new MutationObserver(() => {
+      const currentVid = document.querySelector(
+        `#${AutoscrollerController.SHORTS_INNER_CONTAINER_ID} video`
+      ) as HTMLVideoElement;
 
-  videoNodeObserver.observe(
-    document.querySelector(`#${SHORTS_INNER_CONTAINER_ID}`) as HTMLElement,
-    {
-      childList: true,
-      subtree: true,
-    }
-  );
-};
+      if (currentVid && currentVid.src !== this.lastVideoSrc) {
+        this.setupVideo(currentVid);
+        this.lastVideoSrc = currentVid.src;
+      }
+    });
 
-const initialize = (): void => {
-  const startingVid: HTMLVideoElement | null = document.querySelector(
-    `#${SHORTS_INNER_CONTAINER_ID} video`
-  );
-  if (!startingVid) return;
+    videoNodeObserver.observe(
+      document.querySelector(
+        `#${AutoscrollerController.SHORTS_INNER_CONTAINER_ID}`
+      ) as HTMLElement,
+      {
+        childList: true,
+        subtree: true,
+      }
+    );
+  }
 
-  lastVideoSrc = startingVid.src;
-  setupVideo(startingVid);
-  observeChange();
-};
+  initialize() {
+    const startingVid: HTMLVideoElement | null = document.querySelector(
+      `#${AutoscrollerController.SHORTS_INNER_CONTAINER_ID} video`
+    );
+    if (!startingVid) return;
 
-initialize();
+    this.lastVideoSrc = startingVid.src;
+    this.setupVideo(startingVid);
+    this.observeChange();
+  }
+}
+
+const autoscrollerController = new AutoscrollerController();
+autoscrollerController.initialize();
