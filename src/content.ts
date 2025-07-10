@@ -1,4 +1,3 @@
-// Some Relevant Selectors
 class AutoscrollerController {
   static SHORTS_INNER_CONTAINER_ID = 'shorts-inner-container';
   static NEXT_VIDEO_BUTTON_CONTAINER_ID = 'navigation-button-down';
@@ -59,5 +58,25 @@ class AutoscrollerController {
   }
 }
 
-const autoscrollerController = new AutoscrollerController();
-autoscrollerController.initialize();
+let onShortsPage = false;
+
+const injectAutoscroll = (path: string) => {
+  if (!onShortsPage && path.startsWith('/shorts')) {
+    onShortsPage = true;
+    console.log('here now');
+
+    setTimeout(() => {
+      const autoscrollerController = new AutoscrollerController();
+      autoscrollerController.initialize();
+    }, 2000);
+  } else if (onShortsPage && !path.startsWith('/shorts')) {
+    onShortsPage = false;
+  }
+};
+
+injectAutoscroll(window.location.pathname);
+
+navigation.addEventListener('navigate', (e: NavigateEvent) => {
+  const dest = new URL(e.destination.url).pathname;
+  injectAutoscroll(dest);
+});
