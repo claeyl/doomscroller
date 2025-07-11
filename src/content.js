@@ -2,13 +2,19 @@
 class AutoscrollerController {
     constructor() {
         this.lastVideoSrc = null;
-        this.nextVideoBtn = document.querySelector(`#${AutoscrollerController.NEXT_VIDEO_BUTTON_CONTAINER_ID} button`);
     }
     setupVideo(video) {
         if (!video)
             return;
         video.loop = false;
-        video.addEventListener('ended', () => this.nextVideoBtn.click());
+        video.addEventListener('ended', () => {
+            const arrowDownEvent = new KeyboardEvent('keydown', {
+                key: 'ArrowDown',
+                code: 'ArrowDown',
+                bubbles: true,
+            });
+            document.dispatchEvent(arrowDownEvent);
+        });
         // every triggered event seems to be restting the video's loop to `true`, so we set it back to `false`
         const videoLoopObserver = new MutationObserver(() => (video.loop = false));
         videoLoopObserver.observe(video, { attributeFilter: ['loop'] });
@@ -36,16 +42,15 @@ class AutoscrollerController {
     }
 }
 AutoscrollerController.SHORTS_INNER_CONTAINER_ID = 'shorts-inner-container';
-AutoscrollerController.NEXT_VIDEO_BUTTON_CONTAINER_ID = 'navigation-button-down';
 let onShortsPage = false;
 const injectAutoscroll = (path) => {
     if (!onShortsPage && path.startsWith('/shorts')) {
         onShortsPage = true;
-        console.log('here now');
+        // TODO: fix the method below
         setTimeout(() => {
             const autoscrollerController = new AutoscrollerController();
             autoscrollerController.initialize();
-        }, 2000);
+        }, 3000);
     }
     else if (onShortsPage && !path.startsWith('/shorts')) {
         onShortsPage = false;
